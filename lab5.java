@@ -17,7 +17,7 @@ public class lab5 {
     public static int correctPrediction;
     public static int savePC;
     public static int taken;
-    public static int ghrSize;
+    public static int ghrSize = 2;
     public static int totalBranch;
 
     public static String[][] registerNames = { { "$0", "$v0", "$v1", "$a0" },
@@ -183,8 +183,10 @@ public class lab5 {
 
     public static void correlatingPredictor(int result) {
         int sum = 0;
-        for (int i = GHR.size() - 1; i > 0; i--) {
-            sum += sum + Math.pow(2, GHR.get(i));
+        int temp = 0;
+        for (int i = GHR.size() - 1; i >= 0; i--) {
+            sum += (GHR.get(i) * Math.pow(2, temp));
+            temp++;
         }
 
         if (selector[sum] == 2 || selector[sum] == 3) {
@@ -384,11 +386,12 @@ public class lab5 {
             Arrays.fill(data_memory, 0);
 
         } else if (command.equals("b")) {
-            double percent = (double) correctPrediction / totalBranch;
-            System.out.println("Correct predictions: " + correctPrediction + " Total Branches: " + totalBranch);
-            // System.printf("accuracy %0.2f% (%d correct predictions, %d predictions)",
-            // percent, correctPrediction,
-            // totalBranch);
+            double percent = (double) correctPrediction / totalBranch * 100;
+            System.out.println("");
+            System.out.printf("accuracy %.2f%% (%d correct predictions, %d predictions)",
+                    percent, correctPrediction,
+                    totalBranch);
+            System.out.println("");
         } else {
             System.out.println("Incorrect command.\n");
 
