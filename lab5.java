@@ -17,6 +17,8 @@ public class lab5 {
     public static int correctPrediction;
     public static int savePC;
     public static int taken;
+    public static int ghrSize;
+    public static int totalBranch;
 
     public static String[][] registerNames = { { "$0", "$v0", "$v1", "$a0" },
             { "$a1", "$a2", "$a3", "$t0" },
@@ -179,31 +181,28 @@ public class lab5 {
 
     }
 
-    public static void correlatingPredictor(int result){
+    public static void correlatingPredictor(int result) {
         int sum = 0;
-        for(int i = GHR.size() - 1; i > 0; i--){
+        for (int i = GHR.size() - 1; i > 0; i--) {
             sum += sum + Math.pow(2, GHR.get(i));
         }
 
-        if(selector[sum] == 2 || selector[sum] == 3){
-            if(result == 1){
-                if(selector[sum] == 2){
+        if (selector[sum] == 2 || selector[sum] == 3) {
+            if (result == 1) {
+                if (selector[sum] == 2) {
                     selector[sum] += 1;
                 }
-                correctPrediction ++;
-            }
-            else{
+                correctPrediction++;
+            } else {
                 selector[sum] -= 1;
             }
-        }
-        else if (selector[sum] == 0 || selector[sum] == 1) {
-            if(result == 0){
-                if(selector[sum] == 1){
+        } else if (selector[sum] == 0 || selector[sum] == 1) {
+            if (result == 0) {
+                if (selector[sum] == 1) {
                     selector[sum] -= 1;
                 }
-                correctPrediction ++;
-            }
-            else{
+                correctPrediction++;
+            } else {
                 selector[sum] += 1;
             }
 
@@ -266,13 +265,13 @@ public class lab5 {
                     pc++;
                 }
 
-                if(savePC + 1 == pc){
+                if (savePC + 1 == pc) {
                     taken = 0;
-                }
-                else{
+                } else {
                     taken = 1;
                 }
 
+                totalBranch++;
                 correlatingPredictor(taken);
                 break;
 
@@ -284,13 +283,13 @@ public class lab5 {
                     pc++;
                 }
 
-                if(savePC + 1 == pc){
+                if (savePC + 1 == pc) {
                     taken = 0;
-                }
-                else{
+                } else {
                     taken = 1;
                 }
 
+                totalBranch++;
                 correlatingPredictor(taken);
                 break;
             case "lw":
@@ -384,6 +383,12 @@ public class lab5 {
             pc = 0;
             Arrays.fill(data_memory, 0);
 
+        } else if (command.equals("b")) {
+            double percent = (double) correctPrediction / totalBranch;
+            System.out.println("Correct predictions: " + correctPrediction + " Total Branches: " + totalBranch);
+            // System.printf("accuracy %0.2f% (%d correct predictions, %d predictions)",
+            // percent, correctPrediction,
+            // totalBranch);
         } else {
             System.out.println("Incorrect command.\n");
 
@@ -397,44 +402,33 @@ public class lab5 {
 
         parseASM(scanner);
 
-        String mode = "";
         switch (args.length) {
-            case 1:
-                mode = "interactive";
-                break;
             case 2:
-                mode = "script";
+                break;
+            case 3:
+                ghrSize = Integer.parseInt(args[2]);
                 break;
             default:
                 System.out.println("Incorrect number of arguments");
                 System.exit(0);
         }
 
+        for (int i = 0; i < ghrSize; i++) {
+            GHR.add(0);
+        }
+        int selectorSize = (int) Math.pow(2, ghrSize);
+        selector = new int[selectorSize];
+
         String[] input;
-        if (mode == "interactive") {
-
-            Scanner scanner2 = new Scanner(System.in);
-            Boolean quit = false;
-            do {
-                System.out.print("mips> ");
-                input = scanner2.nextLine().split("\\s");
-                handleCommand(input);
-                System.out.println("");
-            } while (!quit);
-            scanner2.close();
-
+        Scanner scanner2 = new Scanner(new File(args[1]));
+        while (scanner2.hasNext()) {
+            String line = scanner2.nextLine();
+            input = line.split("\\s");
+            System.out.println("mips> " + line);
+            handleCommand(input);
+            System.out.println("");
         }
-        if (mode == "script") {
-            Scanner scanner2 = new Scanner(new File(args[1]));
-            while (scanner2.hasNext()) {
-                String line = scanner2.nextLine();
-                input = line.split("\\s");
-                System.out.println("mips> " + line);
-                handleCommand(input);
-                System.out.println("");
-            }
-            scanner2.close();
-        }
+        scanner2.close();
         scanner.close();
     }
 }
